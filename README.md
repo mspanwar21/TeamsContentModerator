@@ -30,10 +30,10 @@ This project implements a **real-time content moderation system** for Microsoft 
 ![Email Screenshot](screenshot/1.png)
 
 ### 🧠 Logic App Workflow Executed
-![Workflow Run](2.png)
+![Workflow Run](screenshot/2.png)
 
 ### 🛠️ Logic App Designer View
-![Designer View](3.png)
+![Designer View](screenshot/3.png)
 
 ---
 
