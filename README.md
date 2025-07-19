@@ -141,17 +141,6 @@ Your Logic App
 
 ---
 
-## 📬 Contact
-
-> Created by [Mohit Singh Panwar](https://mohitsp21.xyz)  
-> For CST8917 – Cloud Automation & AI Integration  
-> [mohitsp21@gmail.com](mailto:mohitsp21@gmail.com)
-
----
-
-
----
-
 ## 🎥 Demo Video
 
 Watch the full working demo here:  
