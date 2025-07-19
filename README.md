@@ -24,6 +24,19 @@ This project implements a **real-time content moderation system** for Microsoft 
 
 ---
 
+## 📸 Screenshots
+
+### ✅ Alert Email Received
+![Email Screenshot](1.png)
+
+### 🧠 Logic App Workflow Executed
+![Workflow Run](2.png)
+
+### 🛠️ Logic App Designer View
+![Designer View](3.png)
+
+---
+
 ## 🔧 Setup Instructions
 
 ### 1. 🏗️ Provision Required Azure Resources
@@ -122,7 +135,9 @@ Your Logic App
 |------|-------------|
 | `logicapp-definition.json` | Exported Logic App definition |
 | `README.md` | Project documentation |
-| `screenshots/` (optional) | Workflow UI and sample output |
+| `1.png` | Sample alert email |
+| `2.png` | Logic App workflow run |
+| `3.png` | Logic App designer view |
 
 ---
 
@@ -131,5 +146,15 @@ Your Logic App
 > Created by [Mohit Singh Panwar](https://mohitsp21.xyz)  
 > For CST8917 – Cloud Automation & AI Integration  
 > [mohitsp21@gmail.com](mailto:mohitsp21@gmail.com)
+
+---
+
+
+---
+
+## 🎥 Demo Video
+
+Watch the full working demo here:  
+📺 [https://youtu.be/ZAjTICyfKeQ](https://youtu.be/ZAjTICyfKeQ)
 
 ---
