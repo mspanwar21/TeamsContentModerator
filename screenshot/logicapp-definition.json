@@ -1,0 +1,218 @@
+{
+    "definition": {
+        "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+        "contentVersion": "1.0.0.0",
+        "triggers": {
+            "When_a_new_channel_message_is_added": {
+                "recurrence": {
+                    "interval": 1,
+                    "frequency": "Minute"
+                },
+                "evaluatedRecurrence": {
+                    "interval": 1,
+                    "frequency": "Minute"
+                },
+                "splitOn": "@triggerBody()",
+                "type": "ApiConnection",
+                "inputs": {
+                    "host": {
+                        "connection": {
+                            "name": "@parameters('$connections')['teams']['connectionId']"
+                        }
+                    },
+                    "method": "get",
+                    "path": "/trigger/beta/teams/@{encodeURIComponent('a1eb63d2-92c4-4f5c-91be-98ea69ab03cb')}/channels/@{encodeURIComponent('19:6ndz7WFob58yNoIGwTXW8kf9ouLLceVZLd9l4KPJRZ81@thread.tacv2')}/messages",
+                    "queries": {
+                        "$top": 50
+                    }
+                }
+            }
+        },
+        "actions": {
+            "HTTP": {
+                "runAfter": {},
+                "type": "Http",
+                "inputs": {
+                    "uri": "https://cst8917lab3.cognitiveservices.azure.com/contentsafety/text:analyze?api-version=2024-09-01",
+                    "method": "POST",
+                    "headers": {
+                        "Ocp-Apim-Subscription-Key": "FtZX0kzMoU9RznZzH8ajMK0ZKUzw4QKd2U9b5QK0BXbomxFtErqCJQQJ99BGACYeBjFXJ3w3AAAHACOGiwxQ"
+                    },
+                    "body": {
+                        "text": "@{triggerBody()?['body']?['content']}",
+                        "blocklistNames": [],
+                        "categories": [
+                            "Hate",
+                            "SelfHarm",
+                            "Sexual",
+                            "Violence"
+                        ],
+                        "outputType": "FourSeverityLevels"
+                    }
+                },
+                "runtimeConfiguration": {
+                    "contentTransfer": {
+                        "transferMode": "Chunked"
+                    }
+                }
+            },
+            "Parse_JSON": {
+                "runAfter": {
+                    "HTTP": [
+                        "Succeeded"
+                    ]
+                },
+                "type": "ParseJson",
+                "inputs": {
+                    "content": "@body('HTTP')",
+                    "schema": {
+                        "type": "object",
+                        "properties": {
+                            "blocklistsMatch": {
+                                "type": "array",
+                                "items": {}
+                            },
+                            "categoriesAnalysis": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "category": {
+                                            "type": "string"
+                                        },
+                                        "severity": {
+                                            "type": "integer"
+                                        }
+                                    },
+                                    "required": [
+                                        "category",
+                                        "severity"
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "Initialize_variables": {
+                "runAfter": {
+                    "Parse_JSON": [
+                        "Succeeded"
+                    ]
+                },
+                "type": "InitializeVariable",
+                "inputs": {
+                    "variables": [
+                        {
+                            "name": "FlaggedCategories",
+                            "type": "string"
+                        }
+                    ]
+                }
+            },
+            "For_each": {
+                "foreach": "@outputs('Parse_JSON')?['body']?['categoriesAnalysis']",
+                "actions": {
+                    "Condition": {
+                        "actions": {
+                            "Append_to_string_variable": {
+                                "type": "AppendToStringVariable",
+                                "inputs": {
+                                    "name": "FlaggedCategories",
+                                    "value": "- Category: @{items('For_each')?['category']}, Severity: @{items('For_each')?['severity']}\n"
+                                }
+                            }
+                        },
+                        "else": {
+                            "actions": {}
+                        },
+                        "expression": {
+                            "and": [
+                                {
+                                    "greaterOrEquals": [
+                                        "@item()?['severity']",
+                                        2
+                                    ]
+                                }
+                            ]
+                        },
+                        "type": "If"
+                    }
+                },
+                "runAfter": {
+                    "Initialize_variables": [
+                        "Succeeded"
+                    ]
+                },
+                "type": "Foreach"
+            },
+            "Condition_1": {
+                "actions": {
+                    "Send_an_email_(V2)": {
+                        "type": "ApiConnection",
+                        "inputs": {
+                            "host": {
+                                "connection": {
+                                    "name": "@parameters('$connections')['office365']['connectionId']"
+                                }
+                            },
+                            "method": "post",
+                            "body": {
+                                "To": "mohitsp21@gmail.com",
+                                "Subject": "Content Moderation Alert: Harmful Content Detected",
+                                "Body": "<p class=\"editor-paragraph\">Hello Team,<br><br>The following content categories have been flagged:<br>@{variables('FlaggedCategories')}<br><br>Original Message:<br>@{triggerBody()?['body']?['content']}<br><br>Regards,<br>Your Logic App</p>",
+                                "Importance": "Normal"
+                            },
+                            "path": "/v2/Mail"
+                        }
+                    }
+                },
+                "runAfter": {
+                    "For_each": [
+                        "Succeeded"
+                    ]
+                },
+                "else": {
+                    "actions": {}
+                },
+                "expression": {
+                    "and": [
+                        {
+                            "not": {
+                                "equals": [
+                                    "@variables('FlaggedCategories')",
+                                    ""
+                                ]
+                            }
+                        }
+                    ]
+                },
+                "type": "If"
+            }
+        },
+        "outputs": {},
+        "parameters": {
+            "$connections": {
+                "type": "Object",
+                "defaultValue": {}
+            }
+        }
+    },
+    "parameters": {
+        "$connections": {
+            "type": "Object",
+            "value": {
+                "teams": {
+                    "id": "/subscriptions/608b04cc-669f-4c7c-8682-aef963f6ac3e/providers/Microsoft.Web/locations/northcentralus/managedApis/teams",
+                    "connectionId": "/subscriptions/608b04cc-669f-4c7c-8682-aef963f6ac3e/resourceGroups/TeamsContentModerator_group/providers/Microsoft.Web/connections/teams",
+                    "connectionName": "teams"
+                },
+                "office365": {
+                    "id": "/subscriptions/608b04cc-669f-4c7c-8682-aef963f6ac3e/providers/Microsoft.Web/locations/northcentralus/managedApis/office365",
+                    "connectionId": "/subscriptions/608b04cc-669f-4c7c-8682-aef963f6ac3e/resourceGroups/TeamsContentModerator_group/providers/Microsoft.Web/connections/office365",
+                    "connectionName": "office365"
+                }
+            }
+        }
+    }
+}
