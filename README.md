@@ -137,10 +137,10 @@ Your Logic App
 |------|-------------|
 | `logicapp-definition.json` | Exported Logic App definition |
 | `README.md` | Project documentation |
-| `1.png` | Sample alert email |
-| `2.png` | Logic App workflow run |
-| `3.png` | Logic App designer view |
-
+| `3.png` | Sample alert email |
+| `4.png` | Logic App workflow run |
+| `2.png` | Logic App designer view |
+| `1.png` | Logic App designer view |
 ---
 
 ## 🎥 Demo Video
